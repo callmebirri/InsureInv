@@ -57,7 +57,7 @@ class EconomyRegistry(
             }
         }
 
-        logger.severe("No economy provider available. Using NONE provider.")
+        logger.warning("No economy provider available. Using NONE provider.")
         return NoneProvider
     }
 
