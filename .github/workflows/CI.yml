@@ -1,3 +1,4 @@
+```yaml
 name: Build Gradle Project
 
 on:
@@ -31,26 +32,32 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle (clean build)
+      - name: Build with Gradle
         run: ./gradlew clean shadowJar
 
-      - name: Get JAR file name
-        id: get_jar_name
+      - name: Package build artifacts
+        id: package
+        shell: bash
         run: |
-          JAR_FILE=$(find build/libs -name "*.jar" ! -name "*-plain.jar" | head -1)
-          JAR_NAME=$(basename "$JAR_FILE")
-          echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
-          echo "Found JAR: $JAR_NAME"
+          COMMIT_HASH="${GITHUB_SHA}"
+          ZIP_NAME="InsureInv-${COMMIT_HASH}.zip"
+
+          cd build/libs
+          zip -r "../../${ZIP_NAME}" .
+
+          echo "zip_name=${ZIP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Created: ${ZIP_NAME}"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.get_jar_name.outputs.jar_name }}
-          path: |
-            build/libs/*.jar
-            !build/libs/*-plain.jar
+          name: ${{ steps.package.outputs.zip_name }}
+          path: ${{ steps.package.outputs.zip_name }}
           if-no-files-found: error
           compression-level: 6
           retention-days: 7
+```
