@@ -38,24 +38,27 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean shadowJar
 
-      - name: Package build artifacts
-        id: package
-        shell: bash
+      - name: Package JAR
         run: |
-          COMMIT_HASH="${GITHUB_SHA}"
-          ZIP_NAME="InsureInv-${COMMIT_HASH}.zip"
+          ZIP_NAME="InsureInv-${GITHUB_SHA}.zip"
 
           cd build/libs
-          zip -r "../../${ZIP_NAME}" .
 
-          echo "zip_name=${ZIP_NAME}" >> "$GITHUB_OUTPUT"
-          echo "Created: ${ZIP_NAME}"
+          JAR_FILE=$(find . -maxdepth 1 -type f -name "*.jar" ! -name "*-plain.jar" | head -n 1)
 
-      - name: Upload build artifacts
+          if [ -z "$JAR_FILE" ]; then
+            echo "No JAR file found."
+            exit 1
+          fi
+
+          zip "../../${ZIP_NAME}" "$JAR_FILE"
+
+          echo "Created ${ZIP_NAME} containing ${JAR_FILE}"
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.package.outputs.zip_name }}
-          path: ${{ steps.package.outputs.zip_name }}
+          name: InsureInv-${{ github.sha }}
+          path: InsureInv-${{ github.sha }}.zip
           if-no-files-found: error
-          compression-level: 6
           retention-days: 7
