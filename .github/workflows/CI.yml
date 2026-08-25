@@ -16,11 +16,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '25'
           cache: 'gradle'
+      - run: java --version
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
@@ -38,27 +39,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean shadowJar
 
-      - name: Package JAR
-        run: |
-          ZIP_NAME="InsureInv-${GITHUB_SHA}.zip"
-
-          cd build/libs
-
-          JAR_FILE=$(find . -maxdepth 1 -type f -name "*.jar" ! -name "*-plain.jar" | head -n 1)
-
-          if [ -z "$JAR_FILE" ]; then
-            echo "No JAR file found."
-            exit 1
-          fi
-
-          zip "../../${ZIP_NAME}" "$JAR_FILE"
-
-          echo "Created ${ZIP_NAME} containing ${JAR_FILE}"
-
-      - name: Upload build artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: InsureInv-${{ github.sha }}
-          path: InsureInv-${{ github.sha }}.zip
+          path: build/libs/
           if-no-files-found: error
+          compression-level: 6
           retention-days: 7
