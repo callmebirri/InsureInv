@@ -1,8 +1,8 @@
 import java.time.Instant
 
 plugins {
-    kotlin("jvm") version "2.3.21"
-    id("com.gradleup.shadow") version "9.4.2"
+    kotlin("jvm") version "2.4.10"
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 val generateGitProperties by tasks.registering {
@@ -67,7 +67,7 @@ repositories {
 val coroutinesVersion: String by project
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("me.clip:placeholderapi:2.12.2")
     compileOnly("org.black_ixx:playerpoints:3.3.3")
@@ -132,7 +132,6 @@ tasks.register("printGitInfo") {
     group = "help"
     description = "Prints current git information"
     doLast {
-        println("\n=== Git Information ===")
         file(layout.buildDirectory.file("generated/resources/git/git.properties").get().asFile)
             .takeIf { it.exists() }
             ?.readLines()

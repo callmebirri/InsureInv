@@ -3,7 +3,7 @@ pluginManagement {
 
     plugins {
         kotlin("jvm") version kotlinVersion
-        id("com.gradleup.shadow") version "9.4.2"
+        id("com.gradleup.shadow") version "9.6.1"
     }
 }
 

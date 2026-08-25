@@ -3,7 +3,9 @@ package tech.qhuyy.insureinv
 import com.tcoded.folialib.FoliaLib
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.plugin.java.JavaPlugin
+import tech.qhuyy.insureinv.command.InsureInvCommand
 import tech.qhuyy.insureinv.economy.EconomyManager
+import tech.qhuyy.insureinv.listeners.PlayerDeathListener
 import tech.qhuyy.insureinv.managers.ConfigManager
 import tech.qhuyy.insureinv.managers.MessageManager
 import tech.qhuyy.insureinv.metrics.MetricsManager
@@ -93,7 +95,7 @@ open class InsureInv : JavaPlugin() {
     }
 
     private fun registerCommands() {
-        val commandHandler = _root_ide_package_.tech.qhuyy.insureinv.command.InsureInvCommand(
+        val commandHandler = InsureInvCommand(
             this,
             configManager,
             storageManager,
@@ -108,7 +110,7 @@ open class InsureInv : JavaPlugin() {
     }
 
     private fun registerEvents() {
-        val playerDeathListener = _root_ide_package_.tech.qhuyy.insureinv.listeners.PlayerDeathListener(
+        val playerDeathListener = PlayerDeathListener(
             configManager,
             storageManager,
             messageManager

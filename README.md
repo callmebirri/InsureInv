@@ -30,8 +30,6 @@ Designed with performance in mind, it fully supports **Paper 1.20.1+** and **Fol
   seamlessly buy charges. Economy features can also be completely disabled for custom use cases.
 - **💾 Flexible Database Options:** Use what works for your network—scales from simple **SQLite** and **JSON** to
   dedicated **MySQL** connection pools (via HikariCP).
-- **🌍 Multi-language / i18n:** Built-in per-player language support lets your international community read messages in
-  their native tongue.
 
 ---
 
@@ -46,7 +44,6 @@ The main command is `/insureinv`. You can also use the aliases `/inv` or `/hinv`
 | `/insureinv buy <amount>`     | Purchase inventory protection charges.     | `insureinv.use` |
 | `/insureinv toggle`           | Enable or disable active protection.       | `insureinv.use` |
 | `/insureinv info`             | Check remaining charges and active status. | `insureinv.use` |
-| `/insureinv setlang <locale>` | Set your personal display language.        | `insureinv.use` |
 | `/insureinv help`             | Show the user help menu.                   | `insureinv.use` |
 
 ### Admin — Usage Commands
@@ -91,21 +88,6 @@ Controls how players acquire charges:
   platforms.
 - `NONE`: No economy features. Commands like `/insureinv buy` are disabled. Useful if admins want to hand out charges
   directly via scripts or crates.
-
-#### Automatic Provider Priority
-
-If the configured provider is unavailable (or incompatible with the server platform), InsureInv automatically falls back
-through a priority list:
-
-| Platform       | Priority Order                                        |
-|----------------|-------------------------------------------------------|
-| Paper / Spigot | `VAULT` → `VAULT_UNLOCKED` → `PLAYER_POINTS` → `NONE` |
-| Folia          | `VAULT_UNLOCKED` → `PLAYER_POINTS` → `NONE`           |
-
-You can override the default by setting `economy.provider` in `config.yml`. If the chosen provider isn't available, the
-plugin falls back to the next in the platform priority list.
-
-Configure `price-per-charge` and `max-charges-per-player` in `config.yml` according to your server's economy balance.
 
 ---
 
