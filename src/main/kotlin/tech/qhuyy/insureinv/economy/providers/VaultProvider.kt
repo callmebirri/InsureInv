@@ -1,12 +1,11 @@
 package tech.qhuyy.insureinv.economy.providers
 
-import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import tech.qhuyy.insureinv.economy.EconomyProvider
 
 class VaultProvider(
-    private val economy: Economy
+    private val economy: net.milkbowl.vault.economy.Economy
 ) : EconomyProvider {
     override fun isAvailable(): Boolean = true
 
@@ -27,17 +26,21 @@ class VaultProvider(
     companion object {
         fun create(): VaultProvider? {
             val pm = Bukkit.getPluginManager()
-
             val vault = pm.getPlugin("Vault") ?: return null
             if (!vault.isEnabled) return null
 
-            val rsp = Bukkit.getServicesManager()
-                .getRegistration(Economy::class.java)
-                ?: return null
+            return try {
+                val economyClass = Class.forName("net.milkbowl.vault.economy.Economy")
+                @Suppress("UNCHECKED_CAST")
+                val provider = Bukkit.getServicesManager()
+                    .load(economyClass as Class<Any>) as? net.milkbowl.vault.economy.Economy
 
-            val provider = rsp.provider
-
-            return VaultProvider(provider)
+                provider?.let { VaultProvider(it) }
+            } catch (_: ClassNotFoundException) {
+                null
+            } catch (_: Exception) {
+                null
+            }
         }
     }
 }

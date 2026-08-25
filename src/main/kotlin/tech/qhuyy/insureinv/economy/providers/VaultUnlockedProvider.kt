@@ -1,12 +1,12 @@
 package tech.qhuyy.insureinv.economy.providers
 
-import net.milkbowl.vault2.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
+import org.bukkit.plugin.RegisteredServiceProvider
 import tech.qhuyy.insureinv.economy.EconomyProvider
 
 class VaultUnlockedProvider(
-    private val economy: Economy
+    private val economy: net.milkbowl.vault2.economy.Economy
 ) : EconomyProvider {
     private val pluginName = "InsureInv"
 
@@ -33,21 +33,21 @@ class VaultUnlockedProvider(
     companion object {
         fun create(): VaultUnlockedProvider? {
             val pm = Bukkit.getPluginManager()
-            /*
-             Rename from "VaultUnlocked" to "Vault", because VaultUnlocked still uses the name Vault, so in this
-             case it will always return null, causing it to be unable to hook
-             into the provider on Folia. Sorry my bad
-             */
             val vaultUnlocked = pm.getPlugin("Vault") ?: return null
             if (!vaultUnlocked.isEnabled) return null
 
-            val rsp = Bukkit.getServicesManager()
-                .getRegistration(Economy::class.java)
-                ?: return null
+            return try {
+                val economyClass = Class.forName("net.milkbowl.vault2.economy.Economy")
+                @Suppress("UNCHECKED_CAST")
+                val provider = Bukkit.getServicesManager()
+                    .load(economyClass as Class<Any>) as? net.milkbowl.vault2.economy.Economy
 
-            val provider = rsp.provider
-
-            return VaultUnlockedProvider(provider)
+                provider?.let { VaultUnlockedProvider(it) }
+            } catch (_: ClassNotFoundException) {
+                null
+            } catch (_: Exception) {
+                null
+            }
         }
     }
 }
