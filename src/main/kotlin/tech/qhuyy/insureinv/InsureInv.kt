@@ -1,6 +1,7 @@
 package tech.qhuyy.insureinv
 
 import com.tcoded.folialib.FoliaLib
+import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
@@ -17,6 +18,8 @@ private const val PLUGIN_ID: Int = 29775
 
 open class InsureInv : JavaPlugin() {
 
+    lateinit var audience: BukkitAudiences
+        private set
     lateinit var serverSoftware: ServerSoftware
         private set
     lateinit var pluginBuildInfo: PluginBuildInfo
@@ -38,25 +41,24 @@ open class InsureInv : JavaPlugin() {
         foliaLib = FoliaLib(this)
         serverSoftware = ServerSoftware.detectServerSoftware(foliaLib)
         if (serverSoftware in setOf(
-                ServerSoftware.UNKNOWN,
-                ServerSoftware.SPIGOT
+                ServerSoftware.UNKNOWN
             )
         ) {
             logger.severe("═══════════════════════════════════════════════════════════════")
-            logger.severe("InsureInv requires Paper or Folia to run ( including forks ).")
-            logger.severe("Spigot, non-bukkit and other server software are not supported.")
+            logger.severe("InsureInv requires Paper, Spigot or Folia to run ( including forks ).")
+            logger.severe("Non-bukkit and other server software are not supported.")
             logger.severe("Please upgrade to Paper: https://papermc.io/downloads/paper")
             logger.severe("═══════════════════════════════════════════════════════════════")
             server.pluginManager.disablePlugin(this)
             return
         }
-
+        audience = BukkitAudiences.create(this)
         pluginBuildInfo = PluginBuildInfo(this)
 
         if (foliaLib.isFolia) {
             logger.info("Running on Folia - region-safe scheduling enabled")
         } else {
-            logger.info("Running on Paper - standard scheduling enabled")
+            logger.info("Running on Spigot/Paper - standard scheduling enabled")
         }
 
         configManager = ConfigManager(this)
@@ -67,7 +69,7 @@ open class InsureInv : JavaPlugin() {
         )
         metricsManager.start()
 
-        messageManager = MessageManager(this, configManager)
+        messageManager = MessageManager(this, configManager, audience)
 
         economyManager = EconomyManager(this, serverSoftware)
         economyManager.initialize()

@@ -1,5 +1,7 @@
 package tech.qhuyy.insureinv.managers
 
+import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.command.CommandSender
@@ -11,10 +13,14 @@ import java.io.File
 @Suppress("UNUSED")
 class MessageManager(
     private val plugin: InsureInv,
-    private val configManager: ConfigManager
+    private val configManager: ConfigManager,
+    private val audienceBukkit: BukkitAudiences
 ) {
     private val miniMessage: MiniMessage = MiniMessage.miniMessage()
     private var messages: YamlConfiguration = YamlConfiguration()
+
+    private fun audience(player: Player): Audience = audienceBukkit.player(player)
+    private fun audience(sender: CommandSender): Audience = audienceBukkit.sender(sender)
 
     private val noPrefixKeys = setOf(
         "help.header", "help.footer", "help.buy", "help.toggle", "help.info",

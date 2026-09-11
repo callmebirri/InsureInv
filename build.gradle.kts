@@ -3,6 +3,7 @@ import java.time.Instant
 plugins {
     kotlin("jvm") version "2.4.10"
     id("com.gradleup.shadow") version "9.6.1"
+    id("xyz.jpenilla.run-paper") version "3.1.0"
 }
 
 val generateGitProperties by tasks.registering {
@@ -76,6 +77,8 @@ dependencies {
     compileOnly("com.mysql:mysql-connector-j:9.7.0")
     compileOnly("org.xerial:sqlite-jdbc:3.53.2.0")
     compileOnly("com.google.code.gson:gson:2.10.1")
+    // Source: https://mvnrepository.com/artifact/net.kyori/adventure-platform-bukkit
+    compileOnly("net.kyori:adventure-platform-bukkit:4.4.1")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
@@ -126,6 +129,11 @@ tasks.shadowJar {
 
 tasks.build {
     dependsOn(tasks.shadowJar)
+}
+
+tasks.runServer {
+    minecraftVersion("1.21.11")
+    jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
 }
 
 tasks.register("printGitInfo") {

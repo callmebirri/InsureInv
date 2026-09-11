@@ -15,6 +15,7 @@ softdepend:
 libraries:
   - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0
   - com.zaxxer:HikariCP:5.1.0
+  - net.kyori:adventure-platform-bukkit:4.4.1
 
 commands:
   insureinv:
