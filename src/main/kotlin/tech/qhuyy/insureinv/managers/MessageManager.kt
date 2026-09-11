@@ -19,8 +19,8 @@ class MessageManager(
     private val miniMessage: MiniMessage = MiniMessage.miniMessage()
     private var messages: YamlConfiguration = YamlConfiguration()
 
-    private fun audience(player: Player): Audience = audienceBukkit.player(player)
-    private fun audience(sender: CommandSender): Audience = audienceBukkit.sender(sender)
+    private fun audiencePlayer(player: Player): Audience = audienceBukkit.player(player)
+    private fun audienceSender(sender: CommandSender): Audience = audienceBukkit.sender(sender)
 
     private val noPrefixKeys = setOf(
         "help.header", "help.footer", "help.buy", "help.toggle", "help.info",
@@ -34,9 +34,7 @@ class MessageManager(
 
     private val keyMapping = buildKeyMapping()
 
-    init {
-        reload()
-    }
+    init { reload() }
 
     fun reload() {
         val messagesFile = File(plugin.dataFolder, "messages.yml")
@@ -52,9 +50,13 @@ class MessageManager(
         if (sender is Player) {
             val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
             val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-            sender.sendMessage(miniMessage.deserialize(fullMessage))
+            audiencePlayer(sender).sendMessage(
+                miniMessage.deserialize(fullMessage)
+            )
         } else {
-            sender.sendMessage(miniMessage.deserialize(rawMessage))
+            audienceSender(sender).sendMessage(
+                miniMessage.deserialize(rawMessage)
+            )
         }
     }
 
@@ -63,7 +65,9 @@ class MessageManager(
         val rawMessage = resolveMessage(i18nKey, placeholders)
         val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
         val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-        player.sendMessage(miniMessage.deserialize(fullMessage))
+        audiencePlayer(player).sendMessage(
+            miniMessage.deserialize(fullMessage)
+        )
     }
 
     fun parseMessage(message: String): Component {
@@ -82,7 +86,7 @@ class MessageManager(
     fun sendRawMessage(sender: CommandSender, message: String, placeholders: Map<String, String> = emptyMap()) {
         val resolvedMessage = replacePlaceholders(message, placeholders)
         val component = miniMessage.deserialize(resolvedMessage)
-        sender.sendMessage(component)
+        audienceSender(sender).sendMessage(component)
     }
 
     private fun resolveKey(legacyKey: String): String {
