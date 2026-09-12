@@ -73,14 +73,14 @@ The `config.yml` file is straightforward to set up out of the box.
 ### `storage` Options
 
 - **`sqlite` (Default)**: Saves data in a local `data.db` file. Clean and simple.
-- **`mysql`**: Highly recommended for multi-server networks. Uses HikariCP for asynchronous connection pooling.
+- **`mysql`**: Highly recommended for multiserver networks. Uses HikariCP for asynchronous connection pooling.
 - **`json`**: Saves data locally in a `data.json` file. Only use for testing or very low-traffic servers.
 
 ### `economy` Options
 
 Controls how players acquire charges:
 
-- `VAULT` (Default): Hooks into your Vault-compatible economy plugin (EssentialsX, etc). **Not available on Folia.**
+- `VAULT` (Default): Hooks into your Vault-compatible economy plugin (EssentialsX, etc.). **Not available on Folia.**
 - `VAULT_UNLOCKED`: Hooks into [VaultUnlocked](https://www.spigotmc.org/resources/vaultunlocked.117277/), a modern fork
   of Vault with **Folia support**.
 - `PLAYER_POINTS`: Deducts from [PlayerPoints](https://www.spigotmc.org/resources/playerpoints.80745/). Works on all
@@ -126,6 +126,14 @@ InsureInv is built using **Gradle** (Kotlin DSL).
 
 ---
 
-## 📜 License
+## Contributing
 
-InsureInv is completely open-source and distributed under the [MIT License](LICENSE).
+Contributions, issues, and feature requests are welcome!
+Feel free to check the [issues page](https://github.com/callmebirri/InsureInv/issues).
+
+---
+<div align="center">
+
+Developed with ❤️ by **birri**
+
+</div>
