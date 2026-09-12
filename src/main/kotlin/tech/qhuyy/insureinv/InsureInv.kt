@@ -95,13 +95,8 @@ open class InsureInv : JavaPlugin() {
     }
 
     override fun onDisable() {
-        if (::storageManager.isInitialized) {
-            storageManager.shutdown()
-        }
-
-        if(::audienceBukkit.isInitialized) {
-            audienceBukkit.close()
-        }
+        if (::storageManager.isInitialized) storageManager.shutdown()
+        if(::audienceBukkit.isInitialized) audienceBukkit.close()
 
         logger.info("InsureInv disabled.")
     }
