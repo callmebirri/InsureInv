@@ -116,7 +116,7 @@ You can also opt-out globally for your whole server by modifying the bStats conf
 InsureInv is built using **Gradle** (Kotlin DSL).
 
 1. Ensure you have **Java 21** installed (required by Paper 1.21+).
-2. Clone the repository: `git clone https://github.com/wh2sperx/InsureInv.git`
+2. Clone the repository: `git clone https://github.com/callmebirri/InsureInv.git`
 3. Enter the specific directory: `cd InsureInv`
 4. Run the Gradle build task:
     - On Linux/macOS: `./gradlew build`
