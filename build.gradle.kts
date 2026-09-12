@@ -117,8 +117,8 @@ tasks {
             include(dependency("org.bstats:bstats-base"))
         }
 
-        relocate("com.tcoded.folialib", "dev.hqng.insureinv.libs.folialib")
-        relocate("org.bstats", "dev.hqng.insureinv.libs.bstats")
+        relocate("com.tcoded.folialib", "tech.qhuyy.insureinv.libs.folialib")
+        relocate("org.bstats", "tech.qhuyy.insureinv.libs.bstats")
 
         exclude("META-INF/*.SF")
         exclude("META-INF/*.DSA")

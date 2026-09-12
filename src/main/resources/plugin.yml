@@ -3,7 +3,7 @@ version: '${version}-${gitCommit}'
 main: tech.qhuyy.insureinv.InsureInv
 api-version: '1.21'
 folia-supported: true
-authors: [ qhuyy ]
+authors: [ birri ]
 website: https://qhuyy.tech/
 description: Inventory protection plugin with economy integration
 
