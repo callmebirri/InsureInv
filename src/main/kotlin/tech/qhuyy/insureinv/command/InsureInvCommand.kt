@@ -1,5 +1,6 @@
 package tech.qhuyy.insureinv.command
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -17,7 +18,8 @@ class InsureInvCommand(
     private val configManager: ConfigManager,
     private val storageManager: StorageManager,
     private val economyManager: EconomyManager,
-    private val messageManager: MessageManager
+    private val messageManager: MessageManager,
+    private val audienceBukkit: BukkitAudiences
 ) : CommandExecutor, TabCompleter {
 
     private val subcommands: Map<String, SubCommand> = buildMap {
@@ -68,7 +70,8 @@ class InsureInvCommand(
             configManager = configManager,
             storageManager = storageManager,
             economyManager = economyManager,
-            messageManager = messageManager
+            messageManager = messageManager,
+            audienceBukkit
         )
 
         subcommand.execute(context)

@@ -1,7 +1,5 @@
 package tech.qhuyy.insureinv.managers
 
-import net.kyori.adventure.audience.Audience
-import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.command.CommandSender
@@ -13,14 +11,10 @@ import java.io.File
 @Suppress("UNUSED")
 class MessageManager(
     private val plugin: InsureInv,
-    private val configManager: ConfigManager,
-    private val audienceBukkit: BukkitAudiences
+    private val configManager: ConfigManager
 ) {
     private val miniMessage: MiniMessage = MiniMessage.miniMessage()
     private var messages: YamlConfiguration = YamlConfiguration()
-
-    private fun audiencePlayer(player: Player): Audience = audienceBukkit.player(player)
-    private fun audienceSender(sender: CommandSender): Audience = audienceBukkit.sender(sender)
 
     private val noPrefixKeys = setOf(
         "help.header", "help.footer", "help.buy", "help.toggle", "help.info",
@@ -50,11 +44,11 @@ class MessageManager(
         if (sender is Player) {
             val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
             val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-            audiencePlayer(sender).sendMessage(
+            plugin.audienceBukkit.player(sender).sendMessage(
                 miniMessage.deserialize(fullMessage)
             )
         } else {
-            audienceSender(sender).sendMessage(
+            plugin.audienceBukkit.sender(sender).sendMessage(
                 miniMessage.deserialize(rawMessage)
             )
         }
@@ -65,7 +59,7 @@ class MessageManager(
         val rawMessage = resolveMessage(i18nKey, placeholders)
         val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
         val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-        audiencePlayer(player).sendMessage(
+        plugin.audienceBukkit.player(player).sendMessage(
             miniMessage.deserialize(fullMessage)
         )
     }
@@ -86,7 +80,7 @@ class MessageManager(
     fun sendRawMessage(sender: CommandSender, message: String, placeholders: Map<String, String> = emptyMap()) {
         val resolvedMessage = replacePlaceholders(message, placeholders)
         val component = miniMessage.deserialize(resolvedMessage)
-        audienceSender(sender).sendMessage(component)
+        plugin.audienceBukkit.sender(sender).sendMessage(component)
     }
 
     private fun resolveKey(legacyKey: String): String {

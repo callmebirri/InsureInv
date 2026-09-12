@@ -1,9 +1,12 @@
 package tech.qhuyy.insureinv
 
 import com.tcoded.folialib.FoliaLib
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
 import tech.qhuyy.insureinv.economy.EconomyManager
@@ -19,7 +22,7 @@ private const val PLUGIN_ID: Int = 29775
 
 open class InsureInv : JavaPlugin() {
 
-    lateinit var audience: BukkitAudiences
+    lateinit var audienceBukkit: BukkitAudiences
         private set
     lateinit var serverSoftware: ServerSoftware
         private set
@@ -55,7 +58,7 @@ open class InsureInv : JavaPlugin() {
             server.pluginManager.disablePlugin(this)
             return
         }
-        audience = BukkitAudiences.create(this)
+        audienceBukkit = BukkitAudiences.create(this)
         pluginBuildInfo = PluginBuildInfo(this)
 
         if (foliaLib.isFolia) {
@@ -72,7 +75,7 @@ open class InsureInv : JavaPlugin() {
         )
         metricsManager.start()
 
-        messageManager = MessageManager(this, configManager, audience)
+        messageManager = MessageManager(this, configManager)
 
         economyManager = EconomyManager(this, serverSoftware)
         economyManager.initialize()
@@ -105,7 +108,8 @@ open class InsureInv : JavaPlugin() {
             configManager,
             storageManager,
             economyManager,
-            messageManager
+            messageManager,
+            audienceBukkit
         )
 
         getCommand("insureinv")?.apply {
@@ -135,7 +139,7 @@ open class InsureInv : JavaPlugin() {
             " <dark_gray>--------------------------------------</dark_gray>",
             ""
         ).forEach {
-            audience.console().sendMessage(
+            audienceBukkit.console().sendMessage(
                 MiniMessage.miniMessage().deserialize(it)
             )
         }
