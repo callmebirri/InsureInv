@@ -1,12 +1,8 @@
 package tech.qhuyy.insureinv
 
 import com.tcoded.folialib.FoliaLib
-import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
 import tech.qhuyy.insureinv.economy.EconomyManager
@@ -40,6 +36,7 @@ open class InsureInv : JavaPlugin() {
         private set
     lateinit var storageManager: StorageManager
         private set
+
     @Suppress("DEPRECATION")
     val pluginVersion: String get() = description.version
 
@@ -96,7 +93,7 @@ open class InsureInv : JavaPlugin() {
 
     override fun onDisable() {
         if (::storageManager.isInitialized) storageManager.shutdown()
-        if(::audienceBukkit.isInitialized) audienceBukkit.close()
+        if (::audienceBukkit.isInitialized) audienceBukkit.close()
 
         logger.info("InsureInv disabled.")
     }

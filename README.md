@@ -38,12 +38,12 @@ The main command is `/insureinv`. You can also use the aliases `/inv` or `/hinv`
 
 ### Player Commands
 
-| Command                       | Description                                | Permission      |
-|-------------------------------|--------------------------------------------|-----------------|
-| `/insureinv buy <amount>`     | Purchase inventory protection charges.     | `insureinv.use` |
-| `/insureinv toggle`           | Enable or disable active protection.       | `insureinv.use` |
-| `/insureinv info`             | Check remaining charges and active status. | `insureinv.use` |
-| `/insureinv help`             | Show the user help menu.                   | `insureinv.use` |
+| Command                   | Description                                | Permission      |
+|---------------------------|--------------------------------------------|-----------------|
+| `/insureinv buy <amount>` | Purchase inventory protection charges.     | `insureinv.use` |
+| `/insureinv toggle`       | Enable or disable active protection.       | `insureinv.use` |
+| `/insureinv info`         | Check remaining charges and active status. | `insureinv.use` |
+| `/insureinv help`         | Show the user help menu.                   | `insureinv.use` |
 
 ### Admin — Usage Commands
 
@@ -106,7 +106,7 @@ metrics:
   enabled: false
 ```
 
-You can also opt-out globally for your whole server by modifying the bStats config located at
+You can also opt out globally for your whole server by modifying the bStats config located at
 `plugins/bStats/config.yml`.
 
 ---

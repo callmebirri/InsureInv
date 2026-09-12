@@ -28,7 +28,9 @@ class MessageManager(
 
     private val keyMapping = buildKeyMapping()
 
-    init { reload() }
+    init {
+        reload()
+    }
 
     fun reload() {
         val messagesFile = File(plugin.dataFolder, "messages.yml")

@@ -31,6 +31,7 @@ class VaultProvider(
 
             return try {
                 val economyClass = Class.forName("net.milkbowl.vault.economy.Economy")
+
                 @Suppress("UNCHECKED_CAST")
                 val provider = Bukkit.getServicesManager()
                     .load(economyClass as Class<Any>) as? net.milkbowl.vault.economy.Economy

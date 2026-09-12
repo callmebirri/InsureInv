@@ -2,7 +2,6 @@ package tech.qhuyy.insureinv.economy.providers
 
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
-import org.bukkit.plugin.RegisteredServiceProvider
 import tech.qhuyy.insureinv.economy.EconomyProvider
 
 class VaultUnlockedProvider(
@@ -38,6 +37,7 @@ class VaultUnlockedProvider(
 
             return try {
                 val economyClass = Class.forName("net.milkbowl.vault2.economy.Economy")
+
                 @Suppress("UNCHECKED_CAST")
                 val provider = Bukkit.getServicesManager()
                     .load(economyClass as Class<Any>) as? net.milkbowl.vault2.economy.Economy
