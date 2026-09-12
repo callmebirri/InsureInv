@@ -10,6 +10,7 @@ class ConfigManager(
     private val plugin: InsureInv
 ) {
     private var config: FileConfiguration = plugin.config
+    private var cachedDefaultCharge: Int = 0
 
     init {
         plugin.saveDefaultConfig()
@@ -25,6 +26,7 @@ class ConfigManager(
     private fun validateConfig() {
         val requiredPaths = listOf(
             "storage.method",
+            "economy.default-charge",
             "economy.price-per-charge",
             "economy.max-charges-per-player"
         )
@@ -41,6 +43,15 @@ class ConfigManager(
 
         if (getMaxCharges() <= 0) {
             plugin.logger.warning("Invalid max-charges-per-player, must be positive!")
+        }
+
+        val rawDefaultCharge = config.getInt("economy.default-charge", 0)
+        val max = getMaxCharges()
+        cachedDefaultCharge = if (rawDefaultCharge !in 0..max) {
+            plugin.logger.warning("Default charge must be between 0 and $max! Clamping to ${rawDefaultCharge.coerceIn(0, max)}")
+            rawDefaultCharge.coerceIn(0, max)
+        } else {
+            rawDefaultCharge
         }
     }
 
@@ -78,6 +89,7 @@ class ConfigManager(
         }
     }
 
+    fun getDefaultCharge(): Int = cachedDefaultCharge
     fun getPricePerCharge(): Double = config.getDouble("economy.price-per-charge", 100.0)
     fun getMaxCharges(): Int = config.getInt("economy.max-charges-per-player", 10)
 

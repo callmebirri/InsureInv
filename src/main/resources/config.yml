@@ -27,6 +27,7 @@ storage:
 economy:
   # Available provider: VAULT, VAULT_UNLOCKED, PLAYER_POINTS, NONE ( disable economy feature! )
   provider: VAULT
+  default-charge: 1
   price-per-charge: 100.0       # Cost (in economy currency) per protection charge purchased
   max-charges-per-player: 10    # Maximum number of charges a single player can hold at once
 

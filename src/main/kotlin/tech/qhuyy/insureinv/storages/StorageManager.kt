@@ -67,7 +67,11 @@ class StorageManager(
         return globalCache.getOrPut(uuid) {
             runBlocking {
                 currentBackend?.loadPlayerData(uuid)
-            } ?: PlayerDataModel(uuid, username)
+            } ?: PlayerDataModel(
+                uuid,
+                username,
+                configManager.getDefaultCharge()
+            )
         }
     }
 
