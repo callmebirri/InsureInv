@@ -35,7 +35,7 @@ class PluginBuildInfo(private val plugin: InsureInv) {
                 commitTime = props.getProperty("git.commit.time")?.let { raw -> format(raw) } ?: "Unknown",
                 branch = props.getProperty("git.branch", "Unknown"),
                 buildTime = props.getProperty("git.build.time")?.let { raw -> format(raw) } ?: "Unknown",
-                buildVersion = plugin.pluginMeta.version,
+                buildVersion = plugin.pluginVersion,
                 isDirty = props.getProperty("git.dirty", "false")
                     .toBooleanStrictOrNull() ?: false
             )
@@ -60,7 +60,7 @@ class PluginBuildInfo(private val plugin: InsureInv) {
         commitTime = "Unknown",
         branch = "Unknown",
         buildTime = "Unknown",
-        buildVersion = plugin.pluginMeta.version,
+        buildVersion = plugin.pluginVersion,
         isDirty = false
     )
 
@@ -84,10 +84,8 @@ class PluginBuildInfo(private val plugin: InsureInv) {
         "isDirty" to isDirty
     )
 
+    @Suppress("DEPRECATION")
     fun getPluginName(fancy: Boolean): String {
-        return if (!fancy) plugin.pluginMeta.name else "ɪɴѕᴜʀᴇɪɴᴠ"
+        return if (!fancy) plugin.description.name else "ɪɴѕᴜʀᴇɪɴᴠ"
     }
-
-    fun toJson(): String =
-        toMap().entries.joinToString(prefix = "{", postfix = "}") { "\"${it.key}\":\"${it.value}\"" }
 }

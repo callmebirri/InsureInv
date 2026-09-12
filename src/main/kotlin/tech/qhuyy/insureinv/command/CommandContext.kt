@@ -1,16 +1,23 @@
 package tech.qhuyy.insureinv.command
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import tech.qhuyy.insureinv.InsureInv
+import tech.qhuyy.insureinv.economy.EconomyManager
+import tech.qhuyy.insureinv.managers.ConfigManager
+import tech.qhuyy.insureinv.managers.MessageManager
+import tech.qhuyy.insureinv.storages.StorageManager
 
 data class CommandContext(
     val sender: CommandSender,
     val args: Array<String>,
-    val plugin: tech.qhuyy.insureinv.InsureInv,
-    val configManager: tech.qhuyy.insureinv.managers.ConfigManager,
-    val storageManager: tech.qhuyy.insureinv.storages.StorageManager,
-    val economyManager: tech.qhuyy.insureinv.economy.EconomyManager,
-    val messageManager: tech.qhuyy.insureinv.managers.MessageManager
+    val plugin: InsureInv,
+    val configManager: ConfigManager,
+    val storageManager: StorageManager,
+    val economyManager: EconomyManager,
+    val messageManager: MessageManager,
+    val audienceBukkit: BukkitAudiences
 ) {
     val player: Player?
         get() = sender as? Player

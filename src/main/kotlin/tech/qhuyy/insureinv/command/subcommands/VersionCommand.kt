@@ -15,10 +15,11 @@ class VersionCommand(
     override val permission: String = "insureinv.admin"
     override val requiresPlayer: Boolean = false
 
+    @Suppress("DEPRECATION")
     override fun execute(context: CommandContext) {
         listOf(
             "<white><color:#FFC0CB>${plugin.pluginBuildInfo.getPluginName(true)} ${i.buildVersion}</color> <white>ʙʏ</white> <gray>${
-                plugin.pluginMeta.authors.joinToString(
+                plugin.description.authors.joinToString(
                     " and "
                 )
             }</gray>",
@@ -28,7 +29,7 @@ class VersionCommand(
             "<gray>├─</gray><white>ʙᴜɪʟᴛ:</white> <#85C1E9>${i.buildTime}</#85C1E9>",
             "<gray>└─</gray><white>ᴅɪʀᴛʏ:</white> <${if (i.isDirty) "red" else "green"}>${if (i.isDirty) "ᴛʀᴜᴇ" else "ғᴀʟsᴇ"}</${if (i.isDirty) "red" else "green"}>"
         ).forEach {
-            context.sender.sendMessage(
+            context.audienceBukkit.sender(context.sender).sendMessage(
                 mm.deserialize(it)
             )
         }

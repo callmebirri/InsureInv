@@ -1,7 +1,12 @@
 package tech.qhuyy.insureinv
 
 import com.tcoded.folialib.FoliaLib
+import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.platform.bukkit.BukkitAudiences
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
 import tech.qhuyy.insureinv.economy.EconomyManager
@@ -17,6 +22,8 @@ private const val PLUGIN_ID: Int = 29775
 
 open class InsureInv : JavaPlugin() {
 
+    lateinit var audienceBukkit: BukkitAudiences
+        private set
     lateinit var serverSoftware: ServerSoftware
         private set
     lateinit var pluginBuildInfo: PluginBuildInfo
@@ -33,30 +40,31 @@ open class InsureInv : JavaPlugin() {
         private set
     lateinit var storageManager: StorageManager
         private set
+    @Suppress("DEPRECATION")
+    val pluginVersion: String get() = description.version
 
     override fun onEnable() {
         foliaLib = FoliaLib(this)
         serverSoftware = ServerSoftware.detectServerSoftware(foliaLib)
         if (serverSoftware in setOf(
-                ServerSoftware.UNKNOWN,
-                ServerSoftware.SPIGOT
+                ServerSoftware.UNKNOWN
             )
         ) {
             logger.severe("═══════════════════════════════════════════════════════════════")
-            logger.severe("InsureInv requires Paper or Folia to run ( including forks ).")
-            logger.severe("Spigot, non-bukkit and other server software are not supported.")
+            logger.severe("InsureInv requires Paper, Spigot or Folia to run ( including forks ).")
+            logger.severe("Non-bukkit and other server software are not supported.")
             logger.severe("Please upgrade to Paper: https://papermc.io/downloads/paper")
             logger.severe("═══════════════════════════════════════════════════════════════")
             server.pluginManager.disablePlugin(this)
             return
         }
-
+        audienceBukkit = BukkitAudiences.create(this)
         pluginBuildInfo = PluginBuildInfo(this)
 
         if (foliaLib.isFolia) {
             logger.info("Running on Folia - region-safe scheduling enabled")
         } else {
-            logger.info("Running on Paper - standard scheduling enabled")
+            logger.info("Running on Spigot/Paper - standard scheduling enabled")
         }
 
         configManager = ConfigManager(this)
@@ -82,13 +90,17 @@ open class InsureInv : JavaPlugin() {
         registerCommands()
         registerEvents()
 
-        logger.info("InsureInv v${this.pluginMeta.version} enabled successfully! Have Fun :D")
+        logger.info("InsureInv v$pluginVersion enabled successfully! Have Fun :D")
         sendStartupLog()
     }
 
     override fun onDisable() {
         if (::storageManager.isInitialized) {
             storageManager.shutdown()
+        }
+
+        if(::audienceBukkit.isInitialized) {
+            audienceBukkit.close()
         }
 
         logger.info("InsureInv disabled.")
@@ -100,7 +112,8 @@ open class InsureInv : JavaPlugin() {
             configManager,
             storageManager,
             economyManager,
-            messageManager
+            messageManager,
+            audienceBukkit
         )
 
         getCommand("insureinv")?.apply {
@@ -122,16 +135,16 @@ open class InsureInv : JavaPlugin() {
     private fun sendStartupLog() {
         listOf(
             "",
-            " &b${pluginBuildInfo.getPluginName(true)} &7ᴠ${pluginBuildInfo.buildVersion}",
-            " &8--------------------------------------",
-            " &cɪɴꜰᴏʀᴍᴀᴛɪᴏɴ",
-            "&7   • &fɴᴀᴍᴇ: &b${pluginBuildInfo.getPluginName(true)}",
-            "&7   • &fᴀᴜᴛʜᴏʀ: &bꞯʜᴜʏʏ",
-            " &8--------------------------------------",
+            " <aqua>${pluginBuildInfo.getPluginName(true)}</aqua> <gray>ᴠ${pluginBuildInfo.buildVersion}</gray>",
+            " <dark_gray>--------------------------------------</dark_gray>",
+            " <red>ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ</red>",
+            "<gray>   • </gray><white>ɴᴀᴍᴇ: </white><aqua>${pluginBuildInfo.getPluginName(true)}</aqua>",
+            "<gray>   • </gray><white>ᴀᴜᴛʜᴏʀ: </white><aqua>birri</aqua>",
+            " <dark_gray>--------------------------------------</dark_gray>",
             ""
         ).forEach {
-            server.consoleSender.sendMessage(
-                LegacyComponentSerializer.legacyAmpersand().deserialize(it)
+            audienceBukkit.console().sendMessage(
+                MiniMessage.miniMessage().deserialize(it)
             )
         }
     }

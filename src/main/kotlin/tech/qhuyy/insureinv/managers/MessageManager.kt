@@ -28,9 +28,7 @@ class MessageManager(
 
     private val keyMapping = buildKeyMapping()
 
-    init {
-        reload()
-    }
+    init { reload() }
 
     fun reload() {
         val messagesFile = File(plugin.dataFolder, "messages.yml")
@@ -46,9 +44,13 @@ class MessageManager(
         if (sender is Player) {
             val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
             val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-            sender.sendMessage(miniMessage.deserialize(fullMessage))
+            plugin.audienceBukkit.player(sender).sendMessage(
+                miniMessage.deserialize(fullMessage)
+            )
         } else {
-            sender.sendMessage(miniMessage.deserialize(rawMessage))
+            plugin.audienceBukkit.sender(sender).sendMessage(
+                miniMessage.deserialize(rawMessage)
+            )
         }
     }
 
@@ -57,7 +59,9 @@ class MessageManager(
         val rawMessage = resolveMessage(i18nKey, placeholders)
         val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
         val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
-        player.sendMessage(miniMessage.deserialize(fullMessage))
+        plugin.audienceBukkit.player(player).sendMessage(
+            miniMessage.deserialize(fullMessage)
+        )
     }
 
     fun parseMessage(message: String): Component {
@@ -76,7 +80,7 @@ class MessageManager(
     fun sendRawMessage(sender: CommandSender, message: String, placeholders: Map<String, String> = emptyMap()) {
         val resolvedMessage = replacePlaceholders(message, placeholders)
         val component = miniMessage.deserialize(resolvedMessage)
-        sender.sendMessage(component)
+        plugin.audienceBukkit.sender(sender).sendMessage(component)
     }
 
     private fun resolveKey(legacyKey: String): String {
