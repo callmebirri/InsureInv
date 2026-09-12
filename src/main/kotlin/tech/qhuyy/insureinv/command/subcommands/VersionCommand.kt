@@ -15,6 +15,7 @@ class VersionCommand(
     override val permission: String = "insureinv.admin"
     override val requiresPlayer: Boolean = false
 
+    /** Sends the plugin version, authors, and Git build metadata to the command sender. */
     @Suppress("DEPRECATION")
     override fun execute(context: CommandContext) {
         listOf(

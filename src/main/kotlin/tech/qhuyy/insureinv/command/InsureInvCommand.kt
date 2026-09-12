@@ -50,6 +50,12 @@ class InsureInvCommand(
         return true
     }
 
+    /**
+     * Validates and invokes a registered subcommand.
+     *
+     * [args] contains the subcommand name at index zero. Senders that lack permission or do not
+     * meet a player-only requirement receive the corresponding configured error message instead.
+     */
     private fun executeSubcommand(name: String, sender: CommandSender, args: Array<String>) {
         val subcommand = subcommands[name] ?: return
 

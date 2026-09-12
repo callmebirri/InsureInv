@@ -20,6 +20,7 @@ class PluginBuildInfo(private val plugin: InsureInv) {
 
     private val gitInfo: GitInfo by lazy { load() }
 
+    /** Loads packaged Git metadata and combines it with the plugin descriptor version. */
     private fun load(): GitInfo {
         val props = Properties()
         val stream = javaClass.getResourceAsStream("/git.properties")
@@ -54,6 +55,7 @@ class PluginBuildInfo(private val plugin: InsureInv) {
             .format(instant)
     }
 
+    /** Returns fallback build information with unknown Git fields and the plugin descriptor version. */
     private fun default() = GitInfo(
         commitIdAbbrev = "Unknown",
         commitMessage = "Unknown",
@@ -84,6 +86,7 @@ class PluginBuildInfo(private val plugin: InsureInv) {
         "isDirty" to isDirty
     )
 
+    /** Returns the descriptor name, or the fixed stylized display name when [fancy] is true. */
     @Suppress("DEPRECATION")
     fun getPluginName(fancy: Boolean): String {
         return if (!fancy) plugin.description.name else "ɪɴѕᴜʀᴇɪɴᴠ"

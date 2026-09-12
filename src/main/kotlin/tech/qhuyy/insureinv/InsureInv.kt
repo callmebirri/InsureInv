@@ -40,9 +40,16 @@ open class InsureInv : JavaPlugin() {
         private set
     lateinit var storageManager: StorageManager
         private set
+    /** The plugin version declared in the Bukkit plugin descriptor. */
     @Suppress("DEPRECATION")
     val pluginVersion: String get() = description.version
 
+    /**
+     * Initializes the supported-server integrations and plugin services.
+     *
+     * The plugin disables itself when the server software cannot be identified or storage
+     * initialization fails.
+     */
     override fun onEnable() {
         foliaLib = FoliaLib(this)
         serverSoftware = ServerSoftware.detectServerSoftware(foliaLib)
@@ -94,6 +101,7 @@ open class InsureInv : JavaPlugin() {
         sendStartupLog()
     }
 
+    /** Shuts down initialized storage and Adventure audience resources. */
     override fun onDisable() {
         if (::storageManager.isInitialized) {
             storageManager.shutdown()
@@ -106,6 +114,7 @@ open class InsureInv : JavaPlugin() {
         logger.info("InsureInv disabled.")
     }
 
+    /** Attaches the command handler when the `insureinv` command is present in the plugin descriptor. */
     private fun registerCommands() {
         val commandHandler = InsureInvCommand(
             this,
@@ -132,6 +141,7 @@ open class InsureInv : JavaPlugin() {
         server.pluginManager.registerEvents(playerDeathListener, this)
     }
 
+    /** Sends the MiniMessage-formatted plugin and build banner to the server console. */
     private fun sendStartupLog() {
         listOf(
             "",

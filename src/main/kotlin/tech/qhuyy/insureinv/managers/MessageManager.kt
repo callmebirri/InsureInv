@@ -38,6 +38,13 @@ class MessageManager(
         messages = YamlConfiguration.loadConfiguration(messagesFile)
     }
 
+    /**
+     * Resolves and sends a configured MiniMessage message to a command sender.
+     *
+     * Player recipients receive the configured prefix when it is enabled and the resolved key does
+     * not opt out. Non-player recipients never receive the prefix. Entries in [placeholders] replace
+     * matching `{name}` tokens; unmatched tokens remain unchanged.
+     */
     fun sendMessage(sender: CommandSender, messageKey: String, placeholders: Map<String, String> = emptyMap()) {
         val i18nKey = resolveKey(messageKey)
         val rawMessage = resolveMessage(i18nKey, placeholders)
@@ -54,6 +61,12 @@ class MessageManager(
         }
     }
 
+    /**
+     * Resolves and sends a configured MiniMessage message to a player.
+     *
+     * The configured prefix is added when enabled unless the resolved key opts out. Entries in
+     * [placeholders] replace matching `{name}` tokens; unmatched tokens remain unchanged.
+     */
     fun sendMessage(player: Player, messageKey: String, placeholders: Map<String, String> = emptyMap()) {
         val i18nKey = resolveKey(messageKey)
         val rawMessage = resolveMessage(i18nKey, placeholders)
@@ -77,6 +90,11 @@ class MessageManager(
         return miniMessage.deserialize(resolve(key, placeholders))
     }
 
+    /**
+     * Sends caller-provided MiniMessage text without a configuration lookup or prefix.
+     *
+     * Entries in [placeholders] replace matching `{name}` tokens; unmatched tokens remain unchanged.
+     */
     fun sendRawMessage(sender: CommandSender, message: String, placeholders: Map<String, String> = emptyMap()) {
         val resolvedMessage = replacePlaceholders(message, placeholders)
         val component = miniMessage.deserialize(resolvedMessage)

@@ -28,6 +28,7 @@ class MetricsManager(
         plugin.logger.info("bStats metrics enabled.")
     }
 
+    /** Registers a bStats chart that reports the plugin descriptor version. */
     private fun registerPluginVersion(metrics: Metrics) {
         metrics.addCustomChart(
             SimplePie("plugin_version") { plugin.pluginVersion }
