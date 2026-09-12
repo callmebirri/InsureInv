@@ -99,6 +99,10 @@ open class InsureInv : JavaPlugin() {
             storageManager.shutdown()
         }
 
+        if(::audienceBukkit.isInitialized) {
+            audienceBukkit.close()
+        }
+
         logger.info("InsureInv disabled.")
     }
 

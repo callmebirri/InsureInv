@@ -30,7 +30,7 @@ class MetricsManager(
 
     private fun registerPluginVersion(metrics: Metrics) {
         metrics.addCustomChart(
-            SimplePie("plugin_version") { plugin.pluginMeta.version }
+            SimplePie("plugin_version") { plugin.pluginVersion }
         )
     }
 
