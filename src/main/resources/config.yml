@@ -1,34 +1,38 @@
 storage:
+  # Storage backend used to persist plugin data. Options: sqlite, mysql, json
   method: sqlite
 
+  # Settings used only when storage.method is set to "mysql"
   mysql:
-    host: localhost
-    port: 3306
-    database: insureinv
-    username: root
-    password: password
+    host: localhost          # MySQL server address
+    port: 3306                # MySQL server port
+    database: insureinv       # Database name to use/create
+    username: root            # Database login username
+    password: password        # Database login password
     pool:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 10       # Max number of concurrent DB connections in the pool
+      minimum-idle: 2             # Min number of idle connections kept open
+      connection-timeout: 30000   # Max time (ms) to wait for a connection before failing
+      idle-timeout: 600000        # Max time (ms) a connection can sit idle before being closed
+      max-lifetime: 1800000       # Max lifetime (ms) of a connection before it's recycled
 
+  # Settings used only when storage.method is set to "sqlite"
   sqlite:
-    path: data.db
+    path: data.db   # File path (relative to plugin folder) for the SQLite database file
 
+  # Settings used only when storage.method is set to "json"
   json:
-    path: data.json
+    path: data.json   # File path (relative to plugin folder) for the JSON data file
 
 economy:
   # Available provider: VAULT, VAULT_UNLOCKED, PLAYER_POINTS, NONE ( disable economy feature! )
   provider: VAULT
-  price-per-charge: 100.0
-  max-charges-per-player: 10
+  price-per-charge: 100.0       # Cost (in economy currency) per protection charge purchased
+  max-charges-per-player: 10    # Maximum number of charges a single player can hold at once
 
 messages:
-  enable-prefix: false
-  prefix: "<gradient:#00d4ff:#0099ff><bold>[ ɪɴѕᴜʀᴇɪɴᴠ ]</bold></gradient> <dark_gray>»</dark_gray> <white>"
+  enable-prefix: false   # Whether to prepend the prefix below to plugin messages
+  prefix: "<gradient:#00d4ff:#0099ff><bold>[ ɪɴѕᴜʀᴇɪɴᴠ ]</bold></gradient> <dark_gray>»</dark_gray> <white>"   # Prefix text shown before messages when enable-prefix is true
 
 metrics:
-  enabled: true
+  enabled: true   # Whether to send anonymous usage metrics (e.g. bStats)
