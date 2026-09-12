@@ -4,7 +4,6 @@
 
 [![Modrinth](https://img.shields.io/badge/available-Modrinth-00AF5C?logo=modrinth)](https://modrinth.com/plugin/insureinv)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![](https://jitpack.io/v/hqng05/hqng-i18n.svg)](https://jitpack.io/#hqng05/hqng-i18n)
 
 **A flexible, charge-based inventory protection plugin for modern Minecraft servers.**
 
