@@ -1,5 +1,5 @@
 storage:
-  # Storage backend used to persist plugin data. Options: sqlite, mysql, json
+  # Storage backend used to persist plugin data. Options: sqlite, mysql, JSON
   method: sqlite
 
   # Settings used only when storage.method is set to "mysql"
