@@ -2,6 +2,7 @@ package tech.qhuyy.insureinv
 
 import com.tcoded.folialib.FoliaLib
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
@@ -36,6 +37,8 @@ open class InsureInv : JavaPlugin() {
         private set
     lateinit var storageManager: StorageManager
         private set
+    @Suppress("DEPRECATION")
+    val pluginVersion: String get() = description.version
 
     override fun onEnable() {
         foliaLib = FoliaLib(this)
@@ -84,7 +87,7 @@ open class InsureInv : JavaPlugin() {
         registerCommands()
         registerEvents()
 
-        logger.info("InsureInv v${this.pluginMeta.version} enabled successfully! Have Fun :D")
+        logger.info("InsureInv v$pluginVersion enabled successfully! Have Fun :D")
         sendStartupLog()
     }
 
@@ -124,16 +127,16 @@ open class InsureInv : JavaPlugin() {
     private fun sendStartupLog() {
         listOf(
             "",
-            " &b${pluginBuildInfo.getPluginName(true)} &7ᴠ${pluginBuildInfo.buildVersion}",
-            " &8--------------------------------------",
-            " &cɪɴꜰᴏʀᴍᴀᴛɪᴏɴ",
-            "&7   • &fɴᴀᴍᴇ: &b${pluginBuildInfo.getPluginName(true)}",
-            "&7   • &fᴀᴜᴛʜᴏʀ: &bꞯʜᴜʏʏ",
-            " &8--------------------------------------",
+            " <aqua>${pluginBuildInfo.getPluginName(true)}</aqua> <gray>ᴠ${pluginBuildInfo.buildVersion}</gray>",
+            " <dark_gray>--------------------------------------</dark_gray>",
+            " <red>ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ</red>",
+            "<gray>   • </gray><white>ɴᴀᴍᴇ: </white><aqua>${pluginBuildInfo.getPluginName(true)}</aqua>",
+            "<gray>   • </gray><white>ᴀᴜᴛʜᴏʀ: </white><aqua>birri</aqua>",
+            " <dark_gray>--------------------------------------</dark_gray>",
             ""
         ).forEach {
-            server.consoleSender.sendMessage(
-                LegacyComponentSerializer.legacyAmpersand().deserialize(it)
+            audience.console().sendMessage(
+                MiniMessage.miniMessage().deserialize(it)
             )
         }
     }

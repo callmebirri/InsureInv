@@ -77,7 +77,9 @@ dependencies {
     compileOnly("com.mysql:mysql-connector-j:9.7.0")
     compileOnly("org.xerial:sqlite-jdbc:3.53.2.0")
     compileOnly("com.google.code.gson:gson:2.10.1")
-    // Source: https://mvnrepository.com/artifact/net.kyori/adventure-platform-bukkit
+    compileOnly(platform("net.kyori:adventure-bom:4.26.1"))
+    compileOnly("net.kyori:adventure-api")
+    compileOnly("net.kyori:adventure-text-minimessage")
     compileOnly("net.kyori:adventure-platform-bukkit:4.4.1")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
@@ -90,60 +92,65 @@ kotlin {
     jvmToolchain(21)
 }
 
-tasks.processResources {
-    dependsOn(generateGitProperties)
+tasks {
+    processResources {
+        dependsOn(generateGitProperties)
 
-    val props = mapOf(
-        "name" to project.name,
-        "version" to project.version.toString(),
-        "gitCommit" to gitCommitShort,
-    )
-    inputs.properties(props)
-    filesMatching("plugin.yml") {
-        expand(props)
-    }
-}
-
-tasks.shadowJar {
-    archiveClassifier.set("")
-    archiveFileName.set("${project.name}-${project.version}+${gitCommitShort}.jar")
-
-    dependencies {
-        include(dependency("com.tcoded:FoliaLib"))
-        include(dependency("org.bstats:bstats-bukkit"))
-        include(dependency("org.bstats:bstats-base"))
+        val props = mapOf(
+            "name" to project.name,
+            "version" to project.version.toString(),
+            "gitCommit" to gitCommitShort,
+        )
+        inputs.properties(props)
+        filesMatching("plugin.yml") {
+            expand(props)
+        }
     }
 
-    relocate("com.tcoded.folialib", "dev.hqng.insureinv.libs.folialib")
-    relocate("org.bstats", "dev.hqng.insureinv.libs.bstats")
+    shadowJar {
+        archiveClassifier.set("")
+        archiveFileName.set("${project.name}-${project.version}+${gitCommitShort}.jar")
 
-    exclude("META-INF/*.SF")
-    exclude("META-INF/*.DSA")
-    exclude("META-INF/*.RSA")
-    exclude("META-INF/MANIFEST.MF")
-    exclude("META-INF/NOTICE*")
-    exclude("META-INF/versions/**")
-    exclude("META-INF/maven/**")
-    exclude("META-INF/proguard/**")
-}
+        dependencies {
+            include(dependency("com.tcoded:FoliaLib"))
+            include(dependency("org.bstats:bstats-bukkit"))
+            include(dependency("org.bstats:bstats-base"))
+        }
 
-tasks.build {
-    dependsOn(tasks.shadowJar)
-}
+        relocate("com.tcoded.folialib", "dev.hqng.insureinv.libs.folialib")
+        relocate("org.bstats", "dev.hqng.insureinv.libs.bstats")
 
-tasks.runServer {
-    minecraftVersion("1.21.11")
-    jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
-}
+        exclude("META-INF/*.SF")
+        exclude("META-INF/*.DSA")
+        exclude("META-INF/*.RSA")
+        exclude("META-INF/MANIFEST.MF")
+        exclude("META-INF/NOTICE*")
+        exclude("META-INF/versions/**")
+        exclude("META-INF/maven/**")
+        exclude("META-INF/proguard/**")
+    }
 
-tasks.register("printGitInfo") {
-    group = "help"
-    description = "Prints current git information"
-    doLast {
-        file(layout.buildDirectory.file("generated/resources/git/git.properties").get().asFile)
-            .takeIf { it.exists() }
-            ?.readLines()
-            ?.forEach { println(it) }
-            ?: println("Git properties not generated yet. Run 'build' first.")
+    build {
+        dependsOn(shadowJar)
+    }
+
+    runServer {
+        minecraftVersion("1.21.11")
+        jvmArgs("-Xmx2G", "-Xms2G", "-XX:+UseG1GC", "-Dcom.mojang.eula.agree=true")
+        systemProperty("file.encoding", "UTF-8")
+        workingDir(layout.projectDirectory.dir("insureinv-server"))
+        args("--nogui")
+    }
+
+    register("printGitInfo") {
+        group = "help"
+        description = "Prints current git information"
+        doLast {
+            file(layout.buildDirectory.file("generated/resources/git/git.properties").get().asFile)
+                .takeIf { it.exists() }
+                ?.readLines()
+                ?.forEach { println(it) }
+                ?: println("Git properties not generated yet. Run 'build' first.")
+        }
     }
 }
