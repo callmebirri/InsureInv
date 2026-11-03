@@ -103,5 +103,8 @@ build/
 target/
 !gradle/
 
+# Local build toolchain
+.buildenv/
+
 # Common working directory
 run/

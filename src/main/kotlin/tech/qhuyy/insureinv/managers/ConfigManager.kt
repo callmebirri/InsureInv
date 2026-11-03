@@ -61,7 +61,7 @@ class ConfigManager(
 
     fun getMySQLHost(): String = config.getString("storage.mysql.host", "localhost") ?: "localhost"
     fun getMySQLPort(): Int = config.getInt("storage.mysql.port", 3306)
-    fun getMySQLDatabase(): String = config.getString("storage.mysql.database", "hyticinv") ?: "hyticinv"
+    fun getMySQLDatabase(): String = config.getString("storage.mysql.database", "insureinv") ?: "insureinv"
     fun getMySQLUsername(): String = config.getString("storage.mysql.username", "root") ?: "root"
     fun getMySQLPassword(): String = config.getString("storage.mysql.password", "password") ?: "password"
 

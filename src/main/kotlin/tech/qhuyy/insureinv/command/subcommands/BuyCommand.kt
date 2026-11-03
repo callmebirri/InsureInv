@@ -37,7 +37,16 @@ class BuyCommand : SubCommand {
         val pricePerCharge = configManager.getPricePerCharge()
         val totalPrice = amount * pricePerCharge
 
-        if (player.hasPermission("op") || player.hasPermission("insureinv.admin")) {
+        if (playerData.charges + amount > maxCharges) {
+            val canBuy = maxCharges - playerData.charges
+            messageManager.sendMessage(
+                player, "buy-max-exceeded",
+                PlaceholderUtil.of("amount" to canBuy.toString())
+            )
+            return
+        }
+
+        if (player.isOp || player.hasPermission("insureinv.admin")) {
             playerData.addCharges(amount)
             storageManager.savePlayerData(playerData)
 
@@ -48,15 +57,6 @@ class BuyCommand : SubCommand {
                     PlaceholderUtil.economy(totalPrice, balance, amount),
                     PlaceholderUtil.charges(playerData.charges, maxCharges)
                 )
-            )
-            return
-        }
-
-        if (playerData.charges + amount > maxCharges) {
-            val canBuy = maxCharges - playerData.charges
-            messageManager.sendMessage(
-                player, "buy-max-exceeded",
-                PlaceholderUtil.of("amount" to canBuy.toString())
             )
             return
         }

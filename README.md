@@ -18,7 +18,7 @@ system**. Instead of enabling a global `keepInventory` rule that trivializes sur
 by requiring players to purchase "charges" using in-game currency. Each death automatically consumes one charge to keep
 their inventory intact.
 
-Designed with performance in mind, it fully supports **Paper 1.20.1+** and **Folia**.
+Designed with performance in mind, it fully supports **Paper 1.21+** and **Folia**.
 
 ## ✨ Key Features
 

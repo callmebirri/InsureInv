@@ -34,13 +34,6 @@ object PlaceholderUtil {
         )
     }
 
-    fun stats(totalCharges: Int, usageCount: Int): Map<String, String> {
-        return of(
-            "total_charges" to totalCharges.toString(),
-            "usage_count" to usageCount.toString()
-        )
-    }
-
     fun method(method: String): Map<String, String> {
         return of("method" to method)
     }
