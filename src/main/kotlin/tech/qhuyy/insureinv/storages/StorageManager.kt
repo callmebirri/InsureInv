@@ -1,6 +1,7 @@
 package tech.qhuyy.insureinv.storages
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.bukkit.entity.Player
 import tech.qhuyy.insureinv.InsureInv
 import tech.qhuyy.insureinv.managers.ConfigManager
@@ -10,7 +11,6 @@ import tech.qhuyy.insureinv.storages.backend.MySqlStorage
 import tech.qhuyy.insureinv.storages.backend.SqliteStorage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
 import kotlin.time.Duration.Companion.seconds
 
 class StorageManager(
@@ -20,19 +20,76 @@ class StorageManager(
     private var currentBackend: StorageBackend? = null
     private val globalCache = ConcurrentHashMap<UUID, PlayerDataModel>()
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var saveDispatcher: ExecutorCoroutineDispatcher? = newSaveDispatcher()
+    private var writerScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    @Volatile
+    private var saveQueue = Channel<SaveTask>(Channel.UNLIMITED)
+    @Volatile
+    private var writerJob: Job? = null
+    @Volatile
+    private var writerRunning = false
 
-    private fun newSaveDispatcher(): ExecutorCoroutineDispatcher =
-        Executors.newSingleThreadExecutor { runnable ->
-            Thread(runnable, "InsureInv-StorageWriter").apply { isDaemon = true }
-        }.asCoroutineDispatcher()
+    private class SaveTask(
+        val block: suspend () -> Unit,
+        val completion: CompletableDeferred<Unit>? = null
+    )
 
-    private fun writerDispatcher(): ExecutorCoroutineDispatcher =
-        saveDispatcher ?: newSaveDispatcher().also { saveDispatcher = it }
+    private fun startWriter() {
+        saveQueue = Channel(Channel.UNLIMITED)
+        writerRunning = true
+        writerJob = writerScope.launch {
+            for (task in saveQueue) {
+                try {
+                    task.block()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    plugin.logger.severe("Failed to save player data: ${e.message}")
+                    e.printStackTrace()
+                } finally {
+                    task.completion?.complete(Unit)
+                }
+            }
+            writerRunning = false
+        }
+    }
+
+    private fun enqueue(block: suspend () -> Unit) {
+        if (!writerRunning) {
+            plugin.logger.warning("Storage writer is not running, dropping save task")
+            return
+        }
+        if (saveQueue.trySend(SaveTask(block)).isFailure) {
+            plugin.logger.warning("Storage writer rejected a save task")
+        }
+    }
+
+    private fun enqueueAndAwait(block: suspend () -> Unit) {
+        if (!writerRunning) {
+            plugin.logger.warning("Storage writer is not running, dropping save task")
+            return
+        }
+
+        val completion = CompletableDeferred<Unit>()
+        if (saveQueue.trySend(SaveTask(block, completion)).isFailure) {
+            plugin.logger.warning("Storage writer rejected a save task")
+            return
+        }
+
+        val completed = runBlocking {
+            withTimeoutOrNull(SAVE_TIMEOUT) { completion.await() } != null
+        }
+        if (!completed) {
+            plugin.logger.warning("Synchronous save timed out after $SAVE_TIMEOUT")
+        }
+    }
 
     fun initialize(): Boolean {
         scope.cancel()
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        stopWriter()
+        writerScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        startWriter()
+
         val preferredMethod = configManager.getStorageMethod()
         plugin.logger.info("Attempting to initialize storage with method: $preferredMethod")
         val startupTime: Long = System.nanoTime()
@@ -92,7 +149,10 @@ class StorageManager(
         val uuid = player.uniqueId
         val existing = globalCache[uuid]
         if (existing != null) {
-            existing.username = player.name
+            if (existing.username != player.name) {
+                existing.username = player.name
+                savePlayerData(existing)
+            }
             return
         }
 
@@ -110,14 +170,12 @@ class StorageManager(
         val playerData = globalCache[uuid] ?: return
 
         if (async) {
-            scope.launch {
-                withContext(NonCancellable + writerDispatcher()) {
-                    currentBackend?.savePlayerData(playerData)
-                }
+            enqueue {
+                currentBackend?.savePlayerData(playerData)
                 globalCache.remove(uuid, playerData)
             }
         } else {
-            runBlocking {
+            enqueueAndAwait {
                 currentBackend?.savePlayerData(playerData)
             }
             globalCache.remove(uuid, playerData)
@@ -127,13 +185,11 @@ class StorageManager(
     fun savePlayerData(playerDataModel: PlayerDataModel, async: Boolean = true) {
         globalCache[playerDataModel.uuid] = playerDataModel
         if (async) {
-            scope.launch {
-                withContext(writerDispatcher()) {
-                    currentBackend?.savePlayerData(playerDataModel)
-                }
+            enqueue {
+                currentBackend?.savePlayerData(playerDataModel)
             }
         } else {
-            runBlocking {
+            enqueueAndAwait {
                 currentBackend?.savePlayerData(playerDataModel)
             }
         }
@@ -141,38 +197,55 @@ class StorageManager(
 
     fun saveAll(async: Boolean = false) {
         if (async) {
-            scope.launch {
-                globalCache.values.forEach { playerData ->
-                    withContext(writerDispatcher()) {
-                        currentBackend?.savePlayerData(playerData)
-                    }
-                }
+            enqueue {
+                saveCacheSnapshot()
             }
         } else {
-            runBlocking {
-                globalCache.values.forEach { playerData ->
-                    currentBackend?.savePlayerData(playerData)
-                }
+            enqueueAndAwait {
+                saveCacheSnapshot()
             }
         }
+    }
+
+    private suspend fun saveCacheSnapshot() {
+        globalCache.values.forEach { playerData ->
+            currentBackend?.savePlayerData(playerData)
+        }
+    }
+
+    private fun stopWriter() {
+        if (!writerRunning) {
+            saveQueue.close()
+            writerRunning = false
+            return
+        }
+
+        saveQueue.close()
+
+        val drained = runBlocking {
+            withTimeoutOrNull(DRAIN_TIMEOUT) {
+                writerJob?.join()
+                true
+            } ?: false
+        }
+
+        if (!drained) {
+            plugin.logger.warning("Storage writer drain timed out after $DRAIN_TIMEOUT")
+        }
+
+        writerRunning = false
+        writerScope.cancel()
     }
 
     fun shutdown() {
         plugin.logger.info("Saving all cached player data...")
 
-        runBlocking {
-            withTimeoutOrNull(10.seconds) {
-                withContext(writerDispatcher()) {
-                    globalCache.values.forEach { playerData ->
-                        currentBackend?.savePlayerData(playerData)
-                    }
-                }
-            } ?: plugin.logger.warning("Shutdown save timed out after 10 seconds")
+        enqueue {
+            saveCacheSnapshot()
         }
+        stopWriter()
 
         scope.cancel()
-        saveDispatcher?.close()
-        saveDispatcher = null
         currentBackend?.close()
         globalCache.clear()
     }
@@ -188,5 +261,10 @@ class StorageManager(
     fun reload(): Boolean {
         shutdown()
         return initialize()
+    }
+
+    companion object {
+        private val SAVE_TIMEOUT = 10.seconds
+        private val DRAIN_TIMEOUT = 10.seconds
     }
 }
