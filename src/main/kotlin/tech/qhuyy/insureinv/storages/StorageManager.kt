@@ -10,6 +10,7 @@ import tech.qhuyy.insureinv.storages.backend.MySqlStorage
 import tech.qhuyy.insureinv.storages.backend.SqliteStorage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 import kotlin.time.Duration.Companion.seconds
 
 class StorageManager(
@@ -19,6 +20,15 @@ class StorageManager(
     private var currentBackend: StorageBackend? = null
     private val globalCache = ConcurrentHashMap<UUID, PlayerDataModel>()
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var saveDispatcher: ExecutorCoroutineDispatcher? = newSaveDispatcher()
+
+    private fun newSaveDispatcher(): ExecutorCoroutineDispatcher =
+        Executors.newSingleThreadExecutor { runnable ->
+            Thread(runnable, "InsureInv-StorageWriter").apply { isDaemon = true }
+        }.asCoroutineDispatcher()
+
+    private fun writerDispatcher(): ExecutorCoroutineDispatcher =
+        saveDispatcher ?: newSaveDispatcher().also { saveDispatcher = it }
 
     fun initialize(): Boolean {
         scope.cancel()
@@ -64,14 +74,53 @@ class StorageManager(
     }
 
     fun getPlayerData(uuid: UUID, username: String): PlayerDataModel {
-        return globalCache.getOrPut(uuid) {
+        globalCache[uuid]?.let { return it }
+
+        val loaded = runBlocking {
+            currentBackend?.loadPlayerData(uuid)
+        } ?: PlayerDataModel(
+            uuid,
+            username,
+            configManager.getDefaultCharge()
+        )
+        loaded.username = username
+
+        return globalCache.putIfAbsent(uuid, loaded) ?: loaded
+    }
+
+    fun preloadPlayerData(player: Player) {
+        val uuid = player.uniqueId
+        val existing = globalCache[uuid]
+        if (existing != null) {
+            existing.username = player.name
+            return
+        }
+
+        scope.launch {
+            val loaded = currentBackend?.loadPlayerData(uuid)
+                ?: PlayerDataModel(uuid, player.name, configManager.getDefaultCharge())
+
+            loaded.username = player.name
+            globalCache.putIfAbsent(uuid, loaded)
+        }
+    }
+
+    fun unloadPlayerData(player: Player, async: Boolean = true) {
+        val uuid = player.uniqueId
+        val playerData = globalCache[uuid] ?: return
+
+        if (async) {
+            scope.launch {
+                withContext(NonCancellable + writerDispatcher()) {
+                    currentBackend?.savePlayerData(playerData)
+                }
+                globalCache.remove(uuid, playerData)
+            }
+        } else {
             runBlocking {
-                currentBackend?.loadPlayerData(uuid)
-            } ?: PlayerDataModel(
-                uuid,
-                username,
-                configManager.getDefaultCharge()
-            )
+                currentBackend?.savePlayerData(playerData)
+            }
+            globalCache.remove(uuid, playerData)
         }
     }
 
@@ -79,7 +128,9 @@ class StorageManager(
         globalCache[playerDataModel.uuid] = playerDataModel
         if (async) {
             scope.launch {
-                currentBackend?.savePlayerData(playerDataModel)
+                withContext(writerDispatcher()) {
+                    currentBackend?.savePlayerData(playerDataModel)
+                }
             }
         } else {
             runBlocking {
@@ -90,9 +141,11 @@ class StorageManager(
 
     fun saveAll(async: Boolean = false) {
         if (async) {
-            globalCache.values.forEach { playerData ->
-                scope.launch {
-                    currentBackend?.savePlayerData(playerData)
+            scope.launch {
+                globalCache.values.forEach { playerData ->
+                    withContext(writerDispatcher()) {
+                        currentBackend?.savePlayerData(playerData)
+                    }
                 }
             }
         } else {
@@ -109,13 +162,17 @@ class StorageManager(
 
         runBlocking {
             withTimeoutOrNull(10.seconds) {
-                globalCache.values.forEach { playerData ->
-                    currentBackend?.savePlayerData(playerData)
+                withContext(writerDispatcher()) {
+                    globalCache.values.forEach { playerData ->
+                        currentBackend?.savePlayerData(playerData)
+                    }
                 }
             } ?: plugin.logger.warning("Shutdown save timed out after 10 seconds")
         }
 
         scope.cancel()
+        saveDispatcher?.close()
+        saveDispatcher = null
         currentBackend?.close()
         globalCache.clear()
     }

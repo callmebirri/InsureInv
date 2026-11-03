@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.java.JavaPlugin
 import tech.qhuyy.insureinv.command.InsureInvCommand
 import tech.qhuyy.insureinv.economy.EconomyManager
+import tech.qhuyy.insureinv.listeners.PlayerConnectionListener
 import tech.qhuyy.insureinv.listeners.PlayerDeathListener
 import tech.qhuyy.insureinv.managers.ConfigManager
 import tech.qhuyy.insureinv.managers.MessageManager
@@ -122,6 +123,7 @@ open class InsureInv : JavaPlugin() {
         )
 
         server.pluginManager.registerEvents(playerDeathListener, this)
+        server.pluginManager.registerEvents(PlayerConnectionListener(storageManager), this)
     }
 
     private fun sendStartupLog() {

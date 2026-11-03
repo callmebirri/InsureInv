@@ -44,10 +44,8 @@ class MessageManager(
         val i18nKey = resolveKey(messageKey)
         val rawMessage = resolveMessage(i18nKey, placeholders)
         if (sender is Player) {
-            val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
-            val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
             plugin.audienceBukkit.player(sender).sendMessage(
-                miniMessage.deserialize(fullMessage)
+                miniMessage.deserialize(applyPrefix(i18nKey, rawMessage))
             )
         } else {
             plugin.audienceBukkit.sender(sender).sendMessage(
@@ -56,13 +54,16 @@ class MessageManager(
         }
     }
 
+    private fun applyPrefix(i18nKey: String, rawMessage: String): String {
+        val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
+        return if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
+    }
+
     fun sendMessage(player: Player, messageKey: String, placeholders: Map<String, String> = emptyMap()) {
         val i18nKey = resolveKey(messageKey)
         val rawMessage = resolveMessage(i18nKey, placeholders)
-        val shouldAddPrefix = configManager.isPrefixEnabled() && !noPrefixKeys.contains(i18nKey)
-        val fullMessage = if (shouldAddPrefix) configManager.getPrefix() + rawMessage else rawMessage
         plugin.audienceBukkit.player(player).sendMessage(
-            miniMessage.deserialize(fullMessage)
+            miniMessage.deserialize(applyPrefix(i18nKey, rawMessage))
         )
     }
 

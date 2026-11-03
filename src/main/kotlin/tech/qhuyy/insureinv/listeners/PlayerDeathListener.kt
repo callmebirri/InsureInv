@@ -18,6 +18,8 @@ class PlayerDeathListener(
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onPlayerDeath(event: PlayerDeathEvent) {
+        if (event.keepInventory) return
+
         val player = event.entity
         val playerData = storageManager.getPlayerData(player)
 

@@ -74,11 +74,11 @@ class InfoCommand : SubCommand {
         )
         messageManager.sendMessage(
             sender, "info-total-purchases",
-            PlaceholderUtil.stats(playerData.totalChargesPurchased, playerData.protectionActivations)
+            PlaceholderUtil.of("total_charges" to playerData.totalChargesPurchased.toString())
         )
         messageManager.sendMessage(
             sender, "info-usage-count",
-            PlaceholderUtil.stats(playerData.totalChargesPurchased, playerData.protectionActivations)
+            PlaceholderUtil.of("usage_count" to playerData.protectionActivations.toString())
         )
         messageManager.sendMessage(sender, "info-footer")
     }
